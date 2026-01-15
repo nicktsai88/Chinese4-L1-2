@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>L1運動家的風度-多字音練習</title>
+    <title>第4冊 L1運動家的風度-多字音</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Babel for JSX -->
@@ -58,90 +58,90 @@
     <script type="text/babel" data-type="module">
         import React, { useState, useEffect, useCallback } from 'react';
         import { createRoot } from 'react-dom/client';
-        import { BookOpen, List, Sun, User, LogOut, Zap, Heart, BookX, CheckCircle, XCircle, Tag } from 'lucide-react';
+        import { BookOpen, List, Sun, User, LogOut, Zap, Heart, BookX, CheckCircle, XCircle } from 'lucide-react';
         import confetti from 'canvas-confetti';
 
         // STORAGE KEYS
-        const STORAGE_PREFIX = 'Chinese4-L1-2';
+        const STORAGE_PREFIX = 'PolyphonicApp_V1';
         const KEY_USERS = `${STORAGE_PREFIX}_users`;
         
         const getKeyFavorites = (user) => `${STORAGE_PREFIX}_fav_${user}`;
         const getKeyMistakes = (user) => `${STORAGE_PREFIX}_mistake_${user}`;
         const getKeyProgress = (user) => `${STORAGE_PREFIX}_progress_${user}`;
 
-        // 資料庫：包含詞性 (partOfSpeech)
+        // 資料庫：依據最新提供的資料重建
         const rawData = [
             // 1. 飲
-            { id: 101, char: "飲", question: "下而「飲」", answer: "ㄧㄣˋ", partOfSpeech: "動詞", meaning: "特指給牲口喝水、使喝水。", sentence: "古代將士長途跋涉，見溪水清澈，遂下馬讓戰馬喝水，此即下而飲。", distractors: ["ㄧㄣˇ"] },
-            { id: 102, char: "飲", question: "「飲」馬長城", answer: "ㄧㄣˋ", partOfSpeech: "動詞", meaning: "特指給牲口喝水、使喝水。", sentence: "傳說秦朝大將蒙恬曾率軍北上，駐守邊疆並飲馬長城窟。", distractors: ["ㄧㄣˇ"] },
-            { id: 103, char: "飲", question: "造「飲」輒盡", answer: "ㄧㄣˇ", partOfSpeech: "動詞", meaning: "喝、吸食。", sentence: "陶淵明生性嗜酒，親友置酒招待，他總是造飲輒盡（一去喝就喝個精光）。", distractors: ["ㄧㄣˋ"] },
-            { id: 104, char: "飲", question: "「飲」水思源", answer: "ㄧㄣˇ", partOfSpeech: "動詞", meaning: "含忍、懷著（隱藏在心中）。", sentence: "做人要飲水思源，不可忘恩負義。", distractors: ["ㄧㄣˋ"] },
-            { id: 105, char: "飲", question: "「飲」恨", answer: "ㄧㄣˇ", partOfSpeech: "動詞", meaning: "含忍、懷著（隱藏在心中）。", sentence: "這次比賽只差一分就奪冠，全隊只能飲恨而歸。", distractors: ["ㄧㄣˋ"] },
+            { id: 101, char: "飲", question: "下而「飲」", answer: "ㄧㄣˋ", meaning: "特指給牲口喝水、使喝水。", sentence: "古代將士長途跋涉，見溪水清澈，遂下馬讓戰馬喝水，此即下而飲。", distractors: ["ㄧㄣˇ"] },
+            { id: 102, char: "飲", question: "「飲」馬長城", answer: "ㄧㄣˋ", meaning: "特指給牲口喝水、使喝水。", sentence: "傳說秦朝大將蒙恬曾率軍北上，駐守邊疆並飲馬長城窟。", distractors: ["ㄧㄣˇ"] },
+            { id: 103, char: "飲", question: "造「飲」輒盡", answer: "ㄧㄣˇ", meaning: "喝、吸食。", sentence: "陶淵明生性嗜酒，親友置酒招待，他總是造飲輒盡（一去喝就喝個精光）。", distractors: ["ㄧㄣˋ"] },
+            { id: 104, char: "飲", question: "「飲」水思源", answer: "ㄧㄣˇ", meaning: "含忍、懷著（隱藏在心中）。", sentence: "做人要飲水思源，不可忘恩負義。", distractors: ["ㄧㄣˋ"] },
+            { id: 105, char: "飲", question: "「飲」恨", answer: "ㄧㄣˇ", meaning: "含忍、懷著（隱藏在心中）。", sentence: "這次比賽只差一分就奪冠，全隊只能飲恨而歸。", distractors: ["ㄧㄣˋ"] },
 
             // 2. 傳
-            { id: 201, char: "傳", question: "「傳」記", answer: "ㄓㄨㄢˋ", partOfSpeech: "名詞", meaning: "記載人物生平事蹟的書籍。", sentence: "這本傳記詳細記錄了賈伯斯傳奇的一生。", distractors: ["ㄔㄨㄢˊ"] },
-            { id: 202, char: "傳", question: "左「傳」", answer: "ㄓㄨㄢˋ", partOfSpeech: "名詞", meaning: "解釋經義的書籍（如：春秋三傳）。", sentence: "《左傳》擅長敘事，是研究春秋歷史的重要典籍。", distractors: ["ㄔㄨㄢˊ"] },
-            { id: 203, char: "傳", question: "「傳」神", answer: "ㄔㄨㄢˊ", partOfSpeech: "動詞", meaning: "描摹傳寫得很逼真。", sentence: "這幅畫像畫得非常傳神，彷彿真人就在眼前。", distractors: ["ㄓㄨㄢˋ"] },
-            { id: 204, char: "傳", question: "「傳」染", answer: "ㄔㄨㄢˊ", partOfSpeech: "動詞", meaning: "轉授、散布、遞送。", sentence: "流行性感冒的傳染力很強，出入公共場所要戴口罩。", distractors: ["ㄓㄨㄢˋ"] },
-            { id: 205, char: "傳", question: "「傳」話", answer: "ㄔㄨㄢˊ", partOfSpeech: "動詞", meaning: "轉授、散布、遞送。", sentence: "請幫我傳話給經理，說我明天會準時報到。", distractors: ["ㄓㄨㄢˋ"] },
-            { id: 206, char: "傳", question: "「傳」藝", answer: "ㄔㄨㄢˊ", partOfSpeech: "動詞", meaning: "轉授、散布、遞送。", sentence: "老藝師致力於傳藝，希望傳統文化不致失傳。", distractors: ["ㄓㄨㄢˋ"] },
+            { id: 201, char: "傳", question: "「傳」記", answer: "ㄓㄨㄢˋ", meaning: "記載人物生平事蹟的書籍。", sentence: "這本傳記詳細記錄了賈伯斯傳奇的一生。", distractors: ["ㄔㄨㄢˊ"] },
+            { id: 202, char: "傳", question: "左「傳」", answer: "ㄓㄨㄢˋ", meaning: "解釋經義的書籍（如：春秋三傳）。", sentence: "《左傳》擅長敘事，是研究春秋歷史的重要典籍。", distractors: ["ㄔㄨㄢˊ"] },
+            { id: 203, char: "傳", question: "「傳」神", answer: "ㄔㄨㄢˊ", meaning: "描摹傳寫得很逼真。", sentence: "這幅畫像畫得非常傳神，彷彿真人就在眼前。", distractors: ["ㄓㄨㄢˋ"] },
+            { id: 204, char: "傳", question: "「傳」染", answer: "ㄔㄨㄢˊ", meaning: "轉授、散布、遞送。", sentence: "流行性感冒的傳染力很強，出入公共場所要戴口罩。", distractors: ["ㄓㄨㄢˋ"] },
+            { id: 205, char: "傳", question: "「傳」話", answer: "ㄔㄨㄢˊ", meaning: "轉授、散布、遞送。", sentence: "請幫我傳話給經理，說我明天會準時報到。", distractors: ["ㄓㄨㄢˋ"] },
+            { id: 206, char: "傳", question: "「傳」藝", answer: "ㄔㄨㄢˊ", meaning: "轉授、散布、遞送。", sentence: "老藝師致力於傳藝，希望傳統文化不致失傳。", distractors: ["ㄓㄨㄢˋ"] },
 
             // 3. 調
-            { id: 301, char: "調", question: "協「調」", answer: "ㄊㄧㄠˊ", partOfSpeech: "動詞", meaning: "調和、使和解配合。", sentence: "經過老師的協調，這兩位同學終於握手言和。", distractors: ["ㄉㄧㄠˋ"] },
-            { id: 302, char: "調", question: "「調」味", answer: "ㄊㄧㄠˊ", partOfSpeech: "動詞", meaning: "混合、調配。", sentence: "媽媽用少許鹽巴幫這鍋湯調味，味道鮮美極了。", distractors: ["ㄉㄧㄠˋ"] },
-            { id: 303, char: "調", question: "「調」戲", answer: "ㄊㄧㄠˊ", partOfSpeech: "動詞", meaning: "戲弄、挑逗。", sentence: "輕薄的言語調戲他人，是非常不尊重的行為。", distractors: ["ㄉㄧㄠˋ"] },
-            { id: 304, char: "調", question: "「調」度", answer: "ㄉㄧㄠˋ", partOfSpeech: "動詞", meaning: "派遣、安排。", sentence: "為了趕工，工地主任緊急調度了兩台起重機來支援。", distractors: ["ㄊㄧㄠˊ"] },
-            { id: 305, char: "調", question: "陳腔濫「調」", answer: "ㄉㄧㄠˋ", partOfSpeech: "名詞", meaning: "樂曲、格調、意見、風格。", sentence: "他的演講充滿了陳腔濫調，聽得觀眾昏昏欲睡。", distractors: ["ㄊㄧㄠˊ"] },
-            { id: 306, char: "調", question: "單「調」", answer: "ㄉㄧㄠˋ", partOfSpeech: "名詞", meaning: "樂曲、格調、意見、風格。", sentence: "每天做重複的工作難免會覺得生活單調乏味。", distractors: ["ㄊㄧㄠˊ"] },
-            { id: 307, char: "調", question: "論「調」", answer: "ㄉㄧㄠˋ", partOfSpeech: "名詞", meaning: "樂曲、格調、意見、風格。", sentence: "這種悲觀的論調，對於解決問題一點幫助也沒有。", distractors: ["ㄊㄧㄠˊ"] },
+            { id: 301, char: "調", question: "協「調」", answer: "ㄊㄧㄠˊ", meaning: "調和、使和解配合。", sentence: "經過老師的協調，這兩位同學終於握手言和。", distractors: ["ㄉㄧㄠˋ"] },
+            { id: 302, char: "調", question: "「調」味", answer: "ㄊㄧㄠˊ", meaning: "混合、調配。", sentence: "媽媽用少許鹽巴幫這鍋湯調味，味道鮮美極了。", distractors: ["ㄉㄧㄠˋ"] },
+            { id: 303, char: "調", question: "「調」戲", answer: "ㄊㄧㄠˊ", meaning: "戲弄、挑逗。", sentence: "輕薄的言語調戲他人，是非常不尊重的行為。", distractors: ["ㄉㄧㄠˋ"] },
+            { id: 304, char: "調", question: "「調」度", answer: "ㄉㄧㄠˋ", meaning: "派遣、安排。", sentence: "為了趕工，工地主任緊急調度了兩台起重機來支援。", distractors: ["ㄊㄧㄠˊ"] },
+            { id: 305, char: "調", question: "陳腔濫「調」", answer: "ㄉㄧㄠˋ", meaning: "樂曲、格調、意見、風格。", sentence: "他的演講充滿了陳腔濫調，聽得觀眾昏昏欲睡。", distractors: ["ㄊㄧㄠˊ"] },
+            { id: 306, char: "調", question: "單「調」", answer: "ㄉㄧㄠˋ", meaning: "樂曲、格調、意見、風格。", sentence: "每天做重複的工作難免會覺得生活單調乏味。", distractors: ["ㄊㄧㄠˊ"] },
+            { id: 307, char: "調", question: "論「調」", answer: "ㄉㄧㄠˋ", meaning: "樂曲、格調、意見、風格。", sentence: "這種悲觀的論調，對於解決問題一點幫助也沒有。", distractors: ["ㄊㄧㄠˊ"] },
 
             // 4. 行
-            { id: 401, char: "行", question: "「行」必果", answer: "ㄒㄧㄥˊ", partOfSpeech: "動詞", meaning: "做、實踐。", sentence: "君子言必信，行必果（說話守信，做事果斷）。", distractors: ["ㄏㄤˊ"] },
-            { id: 402, char: "行", question: "品「行」", answer: "ㄒㄧㄥˊ", partOfSpeech: "名詞", meaning: "行為舉止。", sentence: "學校不僅重視成績，更看重學生的品行修養。", distractors: ["ㄏㄤˊ"] },
-            { id: 403, char: "行", question: "便宜「行」事", answer: "ㄒㄧㄥˊ", partOfSpeech: "動詞", meaning: "做事、執行。", sentence: "現場情況緊急，指揮官決定便宜行事，先救人要緊。", distractors: ["ㄏㄤˊ"] },
-            { id: 404, char: "行", question: "排「行」", answer: "ㄏㄤˊ", partOfSpeech: "名詞", meaning: "長幼次序。", sentence: "他在家中排行老三，上面還有兩個哥哥。", distractors: ["ㄒㄧㄥˊ"] },
-            { id: 405, char: "行", question: "隔「行」如隔山", answer: "ㄏㄤˊ", partOfSpeech: "名詞", meaning: "行業、職業類別。", sentence: "俗話說隔行如隔山，不是這個領域的專家很難理解其中的門道。", distractors: ["ㄒㄧㄥˊ"] },
+            { id: 401, char: "行", question: "「行」必果", answer: "ㄒㄧㄥˊ", meaning: "做、實踐。", sentence: "君子言必信，行必果（說話守信，做事果斷）。", distractors: ["ㄏㄤˊ"] },
+            { id: 402, char: "行", question: "品「行」", answer: "ㄒㄧㄥˊ", meaning: "行為舉止。", sentence: "學校不僅重視成績，更看重學生的品行修養。", distractors: ["ㄏㄤˊ"] },
+            { id: 403, char: "行", question: "便宜「行」事", answer: "ㄒㄧㄥˊ", meaning: "做事、執行。", sentence: "現場情況緊急，指揮官決定便宜行事，先救人要緊。", distractors: ["ㄏㄤˊ"] },
+            { id: 404, char: "行", question: "排「行」", answer: "ㄏㄤˊ", meaning: "長幼次序。", sentence: "他在家中排行老三，上面還有兩個哥哥。", distractors: ["ㄒㄧㄥˊ"] },
+            { id: 405, char: "行", question: "隔「行」如隔山", answer: "ㄏㄤˊ", meaning: "行業、職業類別。", sentence: "俗話說隔行如隔山，不是這個領域的專家很難理解其中的門道。", distractors: ["ㄒㄧㄥˊ"] },
 
             // 5. 便
-            { id: 501, char: "便", question: "方「便」", answer: "ㄅㄧㄢˋ", partOfSpeech: "形容詞", meaning: "順利、簡易、合宜。", sentence: "這裡交通方便，附近就有捷運站。", distractors: ["ㄆㄧㄢˊ"] },
-            { id: 502, char: "便", question: "「便」宜行事", answer: "ㄅㄧㄢˋ", partOfSpeech: "形容詞", meaning: "權宜變通（此處「便宜」音ㄅㄧㄢˋ ㄧˊ）。", sentence: "既然法規有彈性空間，我們就視情況便宜行事吧。", distractors: ["ㄆㄧㄢˊ"] },
-            { id: 503, char: "便", question: "「便」宜", answer: "ㄆㄧㄢˊ", partOfSpeech: "形容詞", meaning: "價錢低廉。", sentence: "這家店的衣服既便宜又耐穿，深受學生喜愛。", distractors: ["ㄅㄧㄢˋ"] },
-            { id: 504, char: "便", question: "占小「便」宜", answer: "ㄆㄧㄢˊ", partOfSpeech: "名詞", meaning: "不應得的利益。", sentence: "做人要腳踏實地，不要老想著占小便宜。", distractors: ["ㄅㄧㄢˋ"] },
+            { id: 501, char: "便", question: "方「便」", answer: "ㄅㄧㄢˋ", meaning: "順利、簡易、合宜。", sentence: "這裡交通方便，附近就有捷運站。", distractors: ["ㄆㄧㄢˊ"] },
+            { id: 502, char: "便", question: "「便」宜行事", answer: "ㄅㄧㄢˋ", meaning: "權宜變通（此處「便宜」音ㄅㄧㄢˋ ㄧˊ）。", sentence: "既然法規有彈性空間，我們就視情況便宜行事吧。", distractors: ["ㄆㄧㄢˊ"] },
+            { id: 503, char: "便", question: "「便」宜", answer: "ㄆㄧㄢˊ", meaning: "價錢低廉。", sentence: "這家店的衣服既便宜又耐穿，深受學生喜愛。", distractors: ["ㄅㄧㄢˋ"] },
+            { id: 504, char: "便", question: "占小「便」宜", answer: "ㄆㄧㄢˊ", meaning: "不應得的利益。", sentence: "做人要腳踏實地，不要老想著占小便宜。", distractors: ["ㄅㄧㄢˋ"] },
 
             // 6. 稱
-            { id: 601, char: "稱", question: "「稱」快", answer: "ㄔㄥ", partOfSpeech: "動詞", meaning: "叫好、說。", sentence: "惡霸終於被警方逮捕，鄉親們無不拍手稱快。", distractors: ["ㄔㄣˋ"] },
-            { id: 602, char: "稱", question: "「稱」讚", answer: "ㄔㄥ", partOfSpeech: "動詞", meaning: "讚許、表揚。", sentence: "老師稱讚他的作文寫得非常有感情。", distractors: ["ㄔㄣˋ"] },
-            { id: 603, char: "稱", question: "勻「稱」", answer: "ㄔㄣˋ", partOfSpeech: "動詞", meaning: "適合、相配、均勻。", sentence: "經過長期的健身，他的身材變得非常勻稱結實。", distractors: ["ㄔㄥ"] },
+            { id: 601, char: "稱", question: "「稱」快", answer: "ㄔㄥ", meaning: "叫好、說。", sentence: "惡霸終於被警方逮捕，鄉親們無不拍手稱快。", distractors: ["ㄔㄣˋ"] },
+            { id: 602, char: "稱", question: "「稱」讚", answer: "ㄔㄥ", meaning: "讚許、表揚。", sentence: "老師稱讚他的作文寫得非常有感情。", distractors: ["ㄔㄣˋ"] },
+            { id: 603, char: "稱", question: "勻「稱」", answer: "ㄔㄣˋ", meaning: "適合、相配、均勻。", sentence: "經過長期的健身，他的身材變得非常勻稱結實。", distractors: ["ㄔㄥ"] },
 
             // 7. 曾
-            { id: 701, char: "曾", question: "「曾」是以為孝乎", answer: "ㄗㄥ", partOfSpeech: "副詞", meaning: "竟然、難道（乃、竟）。", sentence: "孔子曾感嘆僅有供養父母是不夠的：「曾是以為孝乎？」（難道這就叫做孝順了嗎？）", distractors: ["ㄘㄥˊ"] },
-            { id: 702, char: "曾", question: "「曾」參", answer: "ㄗㄥ", partOfSpeech: "名詞", meaning: "姓氏。", sentence: "曾參是孔子的得意門生，以孝順聞名。", distractors: ["ㄘㄥˊ"] },
-            { id: 703, char: "曾", question: "「曾」經", answer: "ㄘㄥˊ", partOfSpeech: "副詞", meaning: "過去的經歷、表示已經過。", sentence: "我曾經去過那座高山，風景美不勝收。", distractors: ["ㄗㄥ"] },
-            { id: 704, char: "曾", question: "未「曾」", answer: "ㄘㄥˊ", partOfSpeech: "副詞", meaning: "過去的經歷、表示已經過。", sentence: "我們未曾見面，但我對他的大名早有耳聞。", distractors: ["ㄗㄥ"] },
+            { id: 701, char: "曾", question: "「曾」是以為孝乎", answer: "ㄗㄥ", meaning: "竟然、難道（乃、竟）。", sentence: "孔子曾感嘆僅有供養父母是不夠的：「曾是以為孝乎？」（難道這就叫做孝順了嗎？）", distractors: ["ㄘㄥˊ"] },
+            { id: 702, char: "曾", question: "「曾」參", answer: "ㄗㄥ", meaning: "姓氏。", sentence: "曾參是孔子的得意門生，以孝順聞名。", distractors: ["ㄘㄥˊ"] },
+            { id: 703, char: "曾", question: "「曾」經", answer: "ㄘㄥˊ", meaning: "過去的經歷、表示已經過。", sentence: "我曾經去過那座高山，風景美不勝收。", distractors: ["ㄗㄥ"] },
+            { id: 704, char: "曾", question: "未「曾」", answer: "ㄘㄥˊ", meaning: "過去的經歷、表示已經過。", sentence: "我們未曾見面，但我對他的大名早有耳聞。", distractors: ["ㄗㄥ"] },
 
             // 8. 荷
-            { id: 801, char: "荷", question: "負「荷」", answer: "ㄏㄜˋ", partOfSpeech: "動詞", meaning: "承擔、擔負（重量或責任）。", sentence: "這項工作的體力負荷很重，需要強壯的人才能勝任。", distractors: ["ㄏㄜˊ"] },
-            { id: 802, char: "荷", question: "「荷」花", answer: "ㄏㄜˊ", partOfSpeech: "名詞", meaning: "植物名（蓮花）。", sentence: "夏天的池塘裡開滿了粉紅色的荷花，隨風搖曳。", distractors: ["ㄏㄜˋ"] },
+            { id: 801, char: "荷", question: "負「荷」", answer: "ㄏㄜˋ", meaning: "承擔、擔負（重量或責任）。", sentence: "這項工作的體力負荷很重，需要強壯的人才能勝任。", distractors: ["ㄏㄜˊ"] },
+            { id: 802, char: "荷", question: "「荷」花", answer: "ㄏㄜˊ", meaning: "植物名（蓮花）。", sentence: "夏天的池塘裡開滿了粉紅色的荷花，隨風搖曳。", distractors: ["ㄏㄜˋ"] },
 
             // 9. 更
-            { id: 901, char: "更", question: "三「更」半夜", answer: "ㄍㄥ", partOfSpeech: "量詞", meaning: "古代夜間計時單位（一夜分五更）。", sentence: "你不要三更半夜大聲喧嘩，會吵到鄰居睡覺。", distractors: ["ㄍㄥˋ"] },
-            { id: 902, char: "更", question: "「更」加", answer: "ㄍㄥˋ", partOfSpeech: "副詞", meaning: "愈、再（程度加深）。", sentence: "經過這次教訓，他做事變得更加謹慎小心了。", distractors: ["ㄍㄥ"] },
+            { id: 901, char: "更", question: "三「更」半夜", answer: "ㄍㄥ", meaning: "古代夜間計時單位（一夜分五更）。", sentence: "你不要三更半夜大聲喧嘩，會吵到鄰居睡覺。", distractors: ["ㄍㄥˋ"] },
+            { id: 902, char: "更", question: "「更」加", answer: "ㄍㄥˋ", meaning: "愈、再（程度加深）。", sentence: "經過這次教訓，他做事變得更加謹慎小心了。", distractors: ["ㄍㄥ"] },
 
             // 10. 強
-            { id: 1001, char: "強", question: "倔「強」", answer: "ㄐㄧㄤˋ", partOfSpeech: "形容詞", meaning: "固執、不順從。", sentence: "這孩子個性倔強，認定了目標就不輕易改變。", distractors: ["ㄑㄧㄤˊ"] },
-            { id: 1002, char: "強", question: "「強」勁", answer: "ㄑㄧㄤˊ", partOfSpeech: "形容詞", meaning: "力量大的、猛烈的。", sentence: "颱風帶來了強勁的風勢，吹倒了路邊的大樹。", distractors: ["ㄐㄧㄤˋ"] },
-            { id: 1003, char: "強", question: "「強」者", answer: "ㄑㄧㄤˊ", partOfSpeech: "形容詞", meaning: "有權勢或力量的人（此指修飾「者」的屬性）。", sentence: "在競技場上，只有不斷努力才能成為真正的強者。", distractors: ["ㄐㄧㄤˋ"] },
+            { id: 1001, char: "強", question: "倔「強」", answer: "ㄐㄧㄤˋ", meaning: "固執、不順從。", sentence: "這孩子個性倔強，認定了目標就不輕易改變。", distractors: ["ㄑㄧㄤˊ"] },
+            { id: 1002, char: "強", question: "「強」勁", answer: "ㄑㄧㄤˊ", meaning: "力量大的、猛烈的。", sentence: "颱風帶來了強勁的風勢，吹倒了路邊的大樹。", distractors: ["ㄐㄧㄤˋ"] },
+            { id: 1003, char: "強", question: "「強」者", answer: "ㄑㄧㄤˊ", meaning: "有權勢或力量的人。", sentence: "在競技場上，只有不斷努力才能成為真正的強者。", distractors: ["ㄐㄧㄤˋ"] },
 
-            // 11. 諸
-            { id: 1101, char: "諸", question: "公「諸」", answer: "ㄓㄨ", partOfSpeech: "兼詞", meaning: "「之於」二字的合音（置於）。", sentence: "為了公平起見，委員會決定將決策過程公諸社會大眾。", distractors: ["ㄓㄨˋ"] },
-            { id: 1102, char: "諸", question: "「諸」位", answer: "ㄓㄨ", partOfSpeech: "形容詞", meaning: "眾多、各個。", sentence: "諸位嘉賓請就座，典禮馬上就要開始了。", distractors: ["ㄓㄨˋ"] },
-            { id: 1103, char: "諸", question: "「諸」多", answer: "ㄓㄨ", partOfSpeech: "形容詞", meaning: "眾多、各個。", sentence: "由於時間倉促，招待不周之處尚請諸多包涵。", distractors: ["ㄓㄨˋ"] },
+            // 11. 諸 (注音相同，但作為題目練習)
+            { id: 1101, char: "諸", question: "公「諸」", answer: "ㄓㄨ", meaning: "「之於」二字的合音（置於）。", sentence: "為了公平起見，委員會決定將決策過程公諸社會大眾。", distractors: ["ㄓㄨˋ"] },
+            { id: 1102, char: "諸", question: "「諸」位", answer: "ㄓㄨ", meaning: "眾多、各個。", sentence: "諸位嘉賓請就座，典禮馬上就要開始了。", distractors: ["ㄓㄨˋ"] },
+            { id: 1103, char: "諸", question: "「諸」多", answer: "ㄓㄨ", meaning: "眾多、各個。", sentence: "由於時間倉促，招待不周之處尚請諸多包涵。", distractors: ["ㄓㄨˋ"] },
 
             // 12. 樂
-            { id: 1201, char: "樂", question: "快「樂」", answer: "ㄌㄜˋ", partOfSpeech: "形容詞", meaning: "喜悅、歡喜。", sentence: "助人為快樂之本，幫助別人自己也會感到開心。", distractors: ["ㄩㄝˋ", "ㄧㄠˋ"] },
-            { id: 1202, char: "樂", question: "寓教於「樂」", answer: "ㄌㄜˋ", partOfSpeech: "名詞", meaning: "寄託（將教育寄託在樂趣中）。", sentence: "這款遊戲設計得很好，真正做到了寓教於樂。", distractors: ["ㄩㄝˋ", "ㄧㄠˋ"] },
-            { id: 1203, char: "樂", question: "音「樂」", answer: "ㄩㄝˋ", partOfSpeech: "名詞", meaning: "有規律而悅耳的聲音。", sentence: "聽輕柔的音樂可以幫助放鬆心情。", distractors: ["ㄌㄜˋ", "ㄧㄠˋ"] },
-            { id: 1204, char: "樂", question: "「樂」山「樂」水", answer: "ㄧㄠˋ", partOfSpeech: "動詞", meaning: "喜好、欣賞（多用於古文）。", sentence: "孔子說：「仁者樂山，智者樂水。」（仁慈的人喜愛山）。", distractors: ["ㄌㄜˋ", "ㄩㄝˋ"] },
+            { id: 1201, char: "樂", question: "快「樂」", answer: "ㄌㄜˋ", meaning: "喜悅、歡喜。", sentence: "助人為快樂之本，幫助別人自己也會感到開心。", distractors: ["ㄩㄝˋ", "ㄧㄠˋ"] },
+            { id: 1202, char: "樂", question: "寓教於「樂」", answer: "ㄌㄜˋ", meaning: "寄託（將教育寄託在樂趣中）。", sentence: "這款遊戲設計得很好，真正做到了寓教於樂。", distractors: ["ㄩㄝˋ", "ㄧㄠˋ"] },
+            { id: 1203, char: "樂", question: "音「樂」", answer: "ㄩㄝˋ", meaning: "有規律而悅耳的聲音。", sentence: "聽輕柔的音樂可以幫助放鬆心情。", distractors: ["ㄌㄜˋ", "ㄧㄠˋ"] },
+            { id: 1204, char: "樂", question: "「樂」山「樂」水", answer: "ㄧㄠˋ", meaning: "喜好、欣賞（多用於古文）。", sentence: "孔子說：「仁者樂山，智者樂水。」（仁慈的人喜愛山）。", distractors: ["ㄌㄜˋ", "ㄩㄝˋ"] },
         ];
 
         // --- Helper Functions ---
@@ -231,7 +231,7 @@
                 <div className="max-w-4xl mx-auto flex justify-between items-center">
                   <div className="flex items-center space-x-2 cursor-pointer" onClick={() => setMode('menu')}>
                     <BookOpen size={28} />
-                    <h1 className="text-xl md:text-2xl font-bold tracking-wider">L1運動家的風度-多字音練習</h1>
+                    <h1 className="text-xl md:text-2xl font-bold tracking-wider">第4冊 L1運動家的風度-多字音</h1>
                   </div>
                   <div className="flex items-center space-x-4">
                     <div className="hidden md:flex items-center bg-orange-700 px-3 py-1 rounded-full text-sm">
@@ -343,10 +343,7 @@
                         </div>
                         <div className="p-4 space-y-3">
                             <div>
-                                <div className="flex items-center gap-2 mb-1">
-                                    <span className="text-xs font-bold text-stone-400 uppercase tracking-wider">字義補充</span>
-                                    <span className="bg-blue-100 text-blue-800 text-xs font-bold px-2 py-0.5 rounded flex items-center"><Tag size={12} className="mr-1"/>{item.partOfSpeech}</span>
-                                </div>
+                                <span className="text-xs font-bold text-stone-400 uppercase tracking-wider">字義補充</span>
                                 <p className="text-stone-700 mt-1">{item.meaning}</p>
                             </div>
                             <div className="bg-stone-50 p-3 rounded-lg border border-stone-100">
@@ -453,10 +450,7 @@
                                 {isAnswered && (
                                     <div className="mt-4 pt-4 border-t border-black/5 animate-in fade-in slide-in-from-top-2">
                                         <div className="bg-white/60 p-3 rounded-lg border border-stone-100">
-                                            <div className="flex items-center gap-2 mb-1">
-                                                <span className="text-sm font-bold text-stone-500">字義補充</span>
-                                                <span className="bg-blue-100 text-blue-800 text-xs font-bold px-2 py-0.5 rounded flex items-center"><Tag size={12} className="mr-1"/>{item.partOfSpeech}</span>
-                                            </div>
+                                            <p className="text-sm font-bold text-stone-500 mb-1">字義補充</p>
                                             <p className="text-stone-800 mb-3">{item.meaning}</p>
                                             <p className="text-sm font-bold text-stone-500 mb-1">例句</p>
                                             <p className="text-stone-600 italic leading-relaxed">{item.sentence}</p>
